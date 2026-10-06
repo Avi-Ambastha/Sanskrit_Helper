@@ -1,0 +1,964 @@
+# SANSKRIT GRAMMAR RAG
+
+## Corpus Expansion Guidelines
+
+### 1. Use UTF-8 plain text
+
+All corpus files should preferably be `.txt` files encoded as UTF-8.
+
+This is important because the corpus contains Devanagari, Sanskrit diacritics, and transliteration.
+
+GOOD:
+जात्यस्वरितः
+Kṣaipra
+Praśliṣṭa
+Udātta
+Anudātta
+
+AVOID:
+Ksaipra -> when the original source actually contains Kṣaipra, unless the alternate spelling is deliberately retained for retrieval.
+
+---
+
+### 2. Preserve the original Sanskrit
+
+Do not rewrite or "improve" Sanskrit source material.
+
+GOOD:
+
+उदात्तस्यानुदात्तस्य यदा संधिर्यणात्मकः ।
+क्षैप्नामा तदा जात्यस्वरितः सर्वदा भवेत् ॥
+
+If the source contains a spelling or grammatical form that looks unusual, preserve it unless you are explicitly creating a corrected edition.
+
+The RAG should retrieve what the source actually says.
+
+---
+
+### 3. Keep the original source's terminology
+
+Do not silently replace the source's terminology with modern terminology.
+
+GOOD:
+
+Jātyasvarita
+Śuddha Svarita
+Kṣaipra
+Abhinihita
+Praśliṣṭa
+
+If an explanation is added, keep the source term and explain it separately.
+
+GOOD:
+
+Jātyasvarita (जात्यस्वरितः)
+
+Explanation:
+The source describes this as a Svarita that is naturally Svarita and similar to Udātta.
+
+---
+
+### 4. Keep one coherent concept together
+
+This is one of the MOST IMPORTANT rules.
+
+A rule, its explanation, and its examples should normally remain together.
+
+GOOD:
+
+क्षैप्रः
+
+उदात्तस्यानुदात्तस्य यदा संधिर्यणात्मकः ।
+क्षैप्रनामा तदा जात्यस्वरितः सर्वदा भवेत् ॥
+
+Translation:
+...
+
+Example:
+त्रि + अंबकम् = त्र्यम्बकम्
+
+Explanation:
+...
+
+BAD:
+
+File/chunk 1:
+उदात्तस्यानुदात्तस्य...
+
+File/chunk 2:
+Translation of the rule...
+
+File/chunk 3:
+त्रि + अंबकम् = त्र्यम्बकम्
+
+The second arrangement makes it harder for retrieval to understand that all three pieces belong together.
+
+---
+
+### 5. Preserve headings
+
+Every important grammatical section should have a clear heading.
+
+Example:
+
+जात्योत्पत्तिः
+
+Then its content.
+
+Then:
+
+क्षैप्रः
+
+Then its content.
+
+Then:
+
+प्रश्लिष्टः
+
+Then its content.
+
+Then:
+
+अभिनिहितः
+
+Then its content.
+
+Headings are extremely valuable for retrieval because technical Sanskrit terms often appear primarily in headings.
+
+---
+
+### 6. Preserve parent-child relationships
+
+If one section introduces several concepts that are explained later, preserve that structure.
+
+Example:
+
+जात्योत्पत्तिः
+
+A Jātya is produced when the relevant Sandhi belongs to one of:
+
+* Abhinihita
+* Kṣaipra
+* Praśliṣṭa
+
+Later:
+
+क्षैप्रः
+...
+
+प्रश्लिष्टः
+...
+
+अभिनिहितः
+...
+
+Do NOT remove the parent section just because the individual definitions exist elsewhere.
+
+The parent section tells the RAG how the concepts are related.
+
+---
+
+### 7. Keep examples with the rule they demonstrate
+
+Example:
+
+क्षैप्रः
+
+Condition:
+Udātta + Anudātta → Yaṇ
+
+Example:
+त्रि + अंबकम् = त्र्यम्बकम्
+
+This is better than putting all examples in a separate "Examples" section.
+
+The retrieval system can then return the definition and its evidence together.
+
+---
+
+### 8. Keep Sanskrit examples exactly as the source gives them
+
+Do not automatically normalize examples.
+
+GOOD:
+
+त्रि + अंबकम् = त्र्यम्बकम्
+
+If the source gives another spelling:
+
+त्रि + अम्बकम् = त्र्यम्बकम्
+
+preserve that source form.
+
+If you want to provide a normalized form, explicitly label it:
+
+Source form:
+...
+
+Normalized form:
+...
+
+Do not silently substitute one for the other.
+
+---
+
+### 9. Keep translations attached to their Sanskrit rule
+
+GOOD:
+
+Sanskrit:
+उदात्तस्यानुदात्तस्य...
+
+Translation:
+If an Udātta and Anudātta join to create Yaṇ...
+
+Example:
+त्रि + अंबकम् = त्र्यम्बकम्
+
+This gives the retriever both the Sanskrit and the semantic explanation.
+
+---
+
+### 10. Clearly distinguish source text from added explanation
+
+If you manually add explanations to a source, label them.
+
+GOOD:
+
+SOURCE TEXT:
+उदात्तस्यानुदात्तस्य...
+
+SOURCE TRANSLATION:
+...
+
+EXPLANATION:
+This means that...
+
+EXAMPLE:
+...
+
+This prevents the model from confusing your explanation with the original author's words.
+
+---
+
+### 11. Do not mix sources without identifying them
+
+If two books discuss Kṣaipra, keep their identities separate.
+
+GOOD:
+
+SOURCE: Svaramañjarī
+SECTION: क्षैप्रः
+
+...
+
+SOURCE: Another Grammar Text
+SECTION: ...
+
+...
+
+BAD:
+
+Kṣaipra:
+[material from five different books mixed together]
+
+The second approach makes attribution and conflicting interpretations difficult.
+
+---
+
+### 12. Add source metadata when possible
+
+At the beginning of each source file, use something like:
+
+SOURCE:
+Svaramañjarī
+
+AUTHOR:
+[author if known]
+
+TOPIC:
+Vedic Accent
+
+LANGUAGE:
+Sanskrit
+
+SOURCE TYPE:
+Grammar / Commentary / Reference
+
+Then begin the actual text.
+
+Example:
+
+SOURCE: Svaramañjarī
+TOPIC: Vedic Accent
+LANGUAGE: Sanskrit
+
+जात्योत्पत्तिः
+
+...
+
+---
+
+### 13. Keep chapters/sections identifiable
+
+If the source has a hierarchy, preserve it.
+
+Example:
+
+SOURCE: Book X
+
+CHAPTER: Vedic Accents
+
+SECTION: Svarita
+
+SUBSECTION: Jātyasvarita
+
+CONTENT:
+...
+
+This helps when the corpus becomes much larger.
+
+---
+
+### 14. Do not convert everything into question-answer pairs
+
+You do NOT need to create:
+
+Question:
+What is Kṣaipra?
+
+Answer:
+Kṣaipra is...
+
+Instead, preserve the original instructional/reference material.
+
+The RAG can generate questions and answers dynamically.
+
+Primary structure:
+
+SOURCE MATERIAL
+→ RETRIEVAL
+→ LLM SYNTHESIS
+→ ANSWER
+
+not:
+
+PREWRITTEN QUESTIONS
+→ PREWRITTEN ANSWERS
+
+---
+
+### 15. Avoid unnecessary duplication
+
+Do not copy the same rule into ten different places just to make retrieval easier.
+
+BAD:
+
+Kṣaipra definition repeated 10 times.
+
+GOOD:
+
+One authoritative section:
+
+क्षैप्रः
+
+...
+
+If retrieval later needs aliases, handle those in the retrieval layer rather than corrupting the corpus with duplicates.
+
+---
+
+### 16. Preserve transliteration when available
+
+For Sanskrit technical terms, retaining both Sanskrit and transliteration is useful.
+
+Example:
+
+क्षैप्रः (Kṣaipra)
+
+प्रश्लिष्टः (Praśliṣṭa)
+
+अभिनिहितः (Abhinihita)
+
+जात्यस्वरितः (Jātyasvarita)
+
+This helps when the user asks:
+
+"Kṣaipra"
+
+instead of:
+
+"क्षैप्रः"
+
+Your existing alias system provides additional protection, but clean transliteration in the corpus is still valuable.
+
+---
+
+### 17. Do not assume spelling variants are interchangeable
+
+Sanskrit transliteration can appear in several forms.
+
+For example:
+
+Kṣaipra
+Kshaipra
+Ksaipra
+क्षैप्र
+क्षैप्रः
+
+These may refer to the same technical term, but do not randomly replace the source's form.
+
+Preserve the source form.
+
+Handle common search variants through retrieval aliases when necessary.
+
+---
+
+### 18. Be careful with OCR
+
+OCR is one of the biggest dangers when expanding a Sanskrit corpus.
+
+For example, OCR may turn:
+
+उदात्त
+
+into:
+
+उदात्त
+
+or produce subtle errors in:
+
+स्वरित
+जात्यस्वरित
+संधि
+क्षैप्रः
+
+Before adding OCR-derived material:
+
+1. Inspect the Sanskrit.
+2. Check verse boundaries.
+3. Check diacritics/transliteration.
+4. Check examples.
+5. Check headings.
+6. Remove obvious OCR artifacts.
+
+Bad OCR can be worse than missing data because the RAG may confidently retrieve incorrect Sanskrit.
+
+---
+
+### 19. Remove irrelevant material
+
+The corpus should contain material relevant to the tutor's intended domain.
+
+For example, if the tutor is currently a Sanskrit grammar/Vedic-accent tutor, random unrelated material should not be added simply because it is Sanskrit.
+
+GOOD:
+
+Sandhi
+Svaras
+Samāsa
+Pratyaya
+Vedic accent
+Grammar rules
+
+Potentially unrelated:
+
+A completely unrelated Sanskrit literary essay.
+
+A larger corpus is not automatically a better corpus.
+
+---
+
+### 20. Preserve conflicting interpretations
+
+If two sources disagree, DO NOT silently merge them.
+
+Example:
+
+SOURCE A:
+Kṣaipra is defined as X.
+
+SOURCE B:
+Kṣaipra is interpreted as Y.
+
+Keep both.
+
+The tutor can then say:
+
+"Source A states X, while Source B states Y."
+
+This is much better than creating a fake single definition.
+
+---
+
+### 21. Preserve historical claims only when the source actually makes them
+
+If a source says:
+
+"According to Śākalya..."
+
+preserve that attribution.
+
+If the source does NOT say who originated a term, do not add:
+
+"Kṣaipra was invented by..."
+
+from external knowledge unless you are deliberately creating an externally researched source.
+
+This is particularly important because your tutor is designed to be source-grounded.
+
+---
+
+### 22. Keep quotations distinguishable from explanations
+
+GOOD:
+
+SOURCE RULE:
+उदात्तस्यानुदात्तस्य...
+
+SOURCE TRANSLATION:
+...
+
+EXPLANATION:
+In simple terms,...
+
+This makes it possible for the model to distinguish:
+
+"What the source literally states"
+
+from:
+
+"What an explanatory layer says."
+
+---
+
+### 23. Avoid excessive formatting
+
+Plain text is preferable.
+
+You do not need elaborate Markdown.
+
+GOOD:
+
+क्षैप्रः
+
+Definition:
+...
+
+Example:
+...
+
+BAD:
+
+############################
+!!!!!!! KṢAIPRA !!!!!!!!!
+############################
+
+The corpus should be readable to both humans and the parser.
+
+---
+
+### 24. Use consistent labels
+
+Across files, use consistent labels such as:
+
+SOURCE:
+SECTION:
+SUBSECTION:
+SANSKRIT:
+TRANSLATION:
+EXPLANATION:
+EXAMPLE:
+NOTE:
+
+For example:
+
+SOURCE: Svaramañjarī
+SECTION: क्षैप्रः
+
+SANSKRIT:
+उदात्तस्यानुदात्तस्य...
+
+TRANSLATION:
+...
+
+EXAMPLE:
+त्रि + अंबकम् = त्र्यम्बकम्
+
+NOTE:
+...
+
+Consistency becomes increasingly valuable as the corpus grows.
+
+---
+
+### 25. Don't make chunks artificially tiny
+
+Avoid turning every sentence into a separate retrieval document.
+
+For grammar, a useful unit is generally:
+
+HEADING
++
+RULE
++
+TRANSLATION
++
+EXPLANATION
++
+EXAMPLES
+
+This is close to the rule-level chunking you are already using.
+
+---
+
+### 26. Don't make chunks enormous either
+
+A whole 100-page book should not become one retrieval document.
+
+Bad:
+
+Book → one giant chunk.
+
+Better:
+
+Book
+→ Chapter
+→ Section
+→ Subsection/rule
+→ examples
+
+The exact chunking can be adjusted during database creation.
+
+---
+
+### 27. Keep source boundaries clean
+
+Prefer:
+
+FILE 1:
+One source/book/document
+
+FILE 2:
+Another source/book/document
+
+rather than randomly combining unrelated books.
+
+This makes source attribution and debugging much easier.
+
+---
+
+### 28. Before adding a new source, check for duplicates
+
+If you already have:
+
+जात्यस्वरितः
+
+from Source A, and you are adding Source B containing the same section, do not assume it is redundant.
+
+Instead ask:
+
+* Is Source B actually the same text?
+* Is it a commentary?
+* Is it an alternative interpretation?
+* Is it a different edition?
+* Does it contain additional examples?
+
+Duplicate source material can be removed; genuinely different interpretations should be preserved.
+
+---
+
+### 29. Maintain a corpus manifest
+
+As the corpus grows, maintain a simple file such as:
+
+corpus_manifest.txt
+
+Example:
+
+SOURCE 1:
+File: svaramanjari.txt
+Topic: Vedic Accent
+Sections: Svara, Svarita, Jātyasvarita, Kampa
+
+SOURCE 2:
+File: paninian_grammar.txt
+Topic: Pāṇinian Grammar
+Sections: Sandhi, Samāsa, Pratyaya
+
+SOURCE 3:
+File: ...
+
+This is extremely useful when debugging retrieval.
+
+---
+
+### 30. Test retrieval after major corpus expansion
+
+Do NOT assume:
+
+"More documents = better RAG."
+
+After adding a significant amount of material, rerun your benchmark.
+
+For example:
+
+QUERY:
+What is Kṣaipra?
+
+Expected:
+क्षैप्रः
+
+QUERY:
+What are the three Sandhi types producing Jātyasvarita?
+
+Expected:
+जात्योत्पत्तिः
+क्षैप्रः
+प्रश्लिष्टः
+अभिनिहितः
+
+QUERY:
+What is the Sanskrit word for 10?
+
+Expected:
+If the expanded corpus still doesn't contain numerals:
+"The retrieved source does not establish the answer."
+
+---
+
+### 31. Test both exact and natural-language queries
+
+Test:
+
+"क्षैप्रः"
+
+"Kṣaipra"
+
+"Kshaipra"
+
+"What is Kṣaipra?"
+
+"Which Sandhi produces Kṣaipra?"
+
+"How is Jātyasvarita produced?"
+
+The system should retrieve the appropriate material across these formulations.
+
+---
+
+### 32. Test questions that should NOT be answered
+
+This is just as important as testing questions that should be answered.
+
+Examples:
+
+"Who invented Kṣaipra?"
+
+"What is the Sanskrit word for 10?"
+
+"What does Pāṇini 6.1.77 say?"
+
+If the corpus doesn't establish these, the tutor should say so.
+
+This prevents corpus expansion from accidentally turning the system into an unrestricted hallucinating chatbot.
+
+---
+
+### 33. Keep a benchmark set
+
+Maintain a test file such as:
+
+retrieval_benchmark.txt
+
+Example:
+
+TEST 1:
+Question:
+What is Kṣaipra?
+
+Required sections:
+क्षैप्रः
+
+TEST 2:
+Question:
+What are the three Sandhi origins of Jātyasvarita?
+
+Required sections:
+जात्योत्पत्तिः
+क्षैप्रः
+प्रश्लिष्टः
+अभिनिहितः
+
+TEST 3:
+Question:
+Who invented Kṣaipra?
+
+Expected:
+Corpus does not establish the answer.
+
+Every time the database is rebuilt, run this benchmark.
+
+---
+
+### 34. Separate corpus expansion from retrieval changes
+
+When adding new material, don't simultaneously change:
+
+* embedding model
+* BM25 parameters
+* RRF weights
+* chunking
+* aliases
+* prompts
+
+unless necessary.
+
+Otherwise, if performance changes, you won't know why.
+
+A good workflow is:
+
+1. Expand corpus.
+2. Clean corpus.
+3. Validate corpus.
+4. Rebuild database.
+5. Run existing benchmark.
+6. Compare results.
+7. Only then modify retrieval if necessary.
+
+---
+
+### 35. Do not rebuild the database manually after every tiny edit
+
+For several small corpus additions, collect them together.
+
+Then:
+
+CORPUS UPDATE
+→ VALIDATE
+→ REBUILD Chroma
+→ RUN BENCHMARK
+→ DEPLOY
+
+This keeps the database reproducible.
+
+---
+
+# RECOMMENDED FILE STRUCTURE
+
+clean_sanskrit_data/
+
+```
+svaramanjari.txt
+source_02.txt
+source_03.txt
+paninian_grammar.txt
+sandhi.txt
+samasa.txt
+pratyaya.txt
+
+corpus_manifest.txt
+```
+
+# RECOMMENDED SOURCE TEMPLATE
+
+SOURCE:
+[Book/source name]
+
+AUTHOR:
+[Author, if known]
+
+TOPIC:
+[Topic]
+
+CHAPTER:
+[Chapter, if applicable]
+
+SECTION:
+[Section heading]
+
+SANSKRIT:
+[Original Sanskrit]
+
+TRANSLATION:
+[Source translation, if available]
+
+EXPLANATION:
+[Explanation from the source]
+
+EXAMPLE:
+[Original example]
+
+NOTE:
+[Additional source information]
+
+# EXAMPLE
+
+SOURCE:
+Svaramañjarī
+
+TOPIC:
+Vedic Accent
+
+SECTION:
+क्षैप्रः (Kṣaipra)
+
+SANSKRIT:
+
+उदात्तस्यानुदात्तस्य यदा संधिर्यणात्मकः ।
+क्षैप्रनामा तदा जात्यस्वरितः सर्वदा भवेत् ॥ २६॥
+
+TRANSLATION:
+
+If an Udātta and an Anudātta join to create a Yaṇ, the resulting Jātya Svarita is called Kṣaipra.
+
+EXAMPLE:
+
+त्रि + अंबकम् = त्र्यम्बकम्
+
+# GOLDEN RULES
+
+1. Preserve the original Sanskrit.
+2. Use UTF-8.
+3. Keep headings.
+4. Keep rules, translations, explanations, and examples together.
+5. Preserve parent-child relationships.
+6. Identify every source.
+7. Do not silently merge different sources.
+8. Do not silently correct source material.
+9. Do not mix your own explanation with source text without labeling it.
+10. Preserve Sanskrit examples exactly.
+11. Preserve transliteration where available.
+12. Keep OCR errors out of the final corpus.
+13. Avoid unnecessary duplication.
+14. Do not turn everything into Q&A.
+15. Keep chunks conceptually coherent.
+16. Preserve conflicting interpretations rather than merging them.
+17. Test retrieval after major corpus additions.
+18. Test questions that should be answered AND questions that should be refused.
+19. Keep a permanent retrieval benchmark.
+20. Treat corpus quality as more important than corpus size.
+
+# MOST IMPORTANT PRINCIPLE
+
+The corpus should allow the RAG to answer:
+
+"Where did this piece of information come from?"
+
+For every important answer, the ideal chain is:
+
+SOURCE
+↓
+SECTION
+↓
+RULE
+↓
+EXPLANATION
+↓
+EXAMPLE
+↓
+RETRIEVAL
+↓
+GROUNDED ANSWER
+
+If you preserve that chain while expanding the corpus, your current retrieval architecture can scale much more reliably.
