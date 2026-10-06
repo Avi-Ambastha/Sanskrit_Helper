@@ -316,66 +316,21 @@ def build_context(results):
     return "\n\n---\n\n".join(blocks)
 
 
-SYSTEM_PROMPT = """You are a Sanskrit grammar tutor.
+SYSTEM_PROMPT = """You are a Sanskrit grammar tutor using a source-grounded RAG system.
+Answer ONLY from the supplied source context. Do not invent rules, examples, translations, or Sanskrit forms.
+If the context does not contain enough information, explicitly say that the retrieved source does not establish the answer.
+Preserve the source's terminology and distinguish Sanskrit technical terms from explanations.
+When useful, quote short Sanskrit forms exactly and explain them clearly.
+Do not claim that a rule is true beyond what the supplied source establishes."""
 
-You have access to a retrieval database containing Sanskrit grammar material.
-
-PRIMARY RULE — RETRIEVED KNOWLEDGE:
-When relevant retrieved context is supplied, answer using that context as the
-primary and authoritative basis. Do not replace it with general knowledge.
-Preserve the source's terminology, distinctions, Sanskrit forms, examples,
-and stated scope. Do not invent rules, examples, translations, historical
-claims, or explanations that contradict or exceed the retrieved material.
-
-NO-RETRIEVAL FALLBACK:
-Only when the system explicitly says that NO relevant database context was
-found may you answer from your own general knowledge of Sanskrit grammar.
-When doing so, make it clear that the answer comes from general knowledge
-rather than the tutor's retrieved material. Do not pretend that general
-knowledge came from the database.
-
-IMPORTANT:
-- Never mention the retrieval system, database, chunks, rankings, sources,
-  source numbers, R1/R2, metadata, or internal implementation.
-- Never say "Source 1", "Source 2", "according to the retrieved source",
-  or similar internal-reference language in the student-facing answer.
-- If relevant database context is supplied but it does not establish a
-  requested detail, say that the available material does not establish that
-  detail. Do not silently fill that gap from general knowledge.
-- Explain Sanskrit technical terms clearly when useful.
-- Preserve Sanskrit forms accurately.
-- Be concise but sufficiently explanatory for a student.
-"""
-
-
-def generate_answer(query, context, groq_api_key, context_found):
-    if context_found:
-        retrieval_instruction = """RELEVANT DATABASE CONTEXT WAS FOUND.
-You MUST answer from the supplied context. Do not use outside knowledge to
-fill missing details. If the context does not establish part of the answer,
-say so explicitly."""
-        context_block = context
-    else:
-        retrieval_instruction = """NO RELEVANT DATABASE CONTEXT WAS FOUND.
-You may answer from your general knowledge of Sanskrit grammar. Clearly
-indicate that this part of the answer is based on general knowledge rather
-than the tutor's database."""
-        context_block = "(No relevant database context was found.)"
-
-    user_prompt = f"""{retrieval_instruction}
-
-Question:
+def generate_answer(query, context, groq_api_key):
+    user_prompt = f"""Question:
 {query}
 
-Retrieved context:
-{context_block}
+Retrieved source context:
+{context}
 
-Give a clear, helpful tutor-style answer."""
-
-    if not groq_api_key:
-        raise ValueError(
-            "The Groq API key is not configured. Add GROQ_API_KEY to Streamlit Secrets."
-        )
+Give a clear, concise tutor-style answer grounded in the retrieved context."""
 
     payload = {
         "model": GROQ_MODEL,
@@ -383,11 +338,9 @@ Give a clear, helpful tutor-style answer."""
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user_prompt},
         ],
-        "temperature": 0.2,
-        "reasoning_effort": "none",
-        "max_completion_tokens": 1400,
+        "temperature": 0.1,
+        "max_tokens": 1200,
     }
-
     response = requests.post(
         f"{GROQ_URL}/chat/completions",
         headers={
@@ -449,18 +402,11 @@ if query:
                     query,
                     k=TOP_K,
                 )
-                context_found = retriever.has_relevant_context(
-                    query,
-                    results,
-                    dense_results,
-                    lexical_results,
-                )
-                context = build_context(results) if context_found else ""
+                context = build_context(results)
                 answer = generate_answer(
                     query,
                     context,
                     groq_api_key,
-                    context_found,
                 )
             except requests.exceptions.Timeout:
                 answer = "The tutor took too long to respond. Please try again."
